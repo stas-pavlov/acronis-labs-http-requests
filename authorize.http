@@ -1,0 +1,35 @@
+baseUrl = https://dev-cloud.acronis.com/api/2
+
+# Issue a JST token uning an API Client credentials
+# @name issueToken
+POST {{baseUrl}}/idp/token HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+Authorization: Basic {{client_id}}:{{client_secret}}
+
+grant_type=client_credentials
+
+###
+@token = {{issueToken.response.body.access_token}}
+
+# Get an API Client info
+# @name apiClient
+GET {{baseUrl}}/clients/{{client_id}} HTTP/1.1
+Authorization: Bearer {{token}}
+
+###
+@root_tenant_id = {{apiClient.response.body.tenant_id}}
+
+# Get a root teanant info
+GET {{baseUrl}}/tenants/{{root_tenant_id}} HTTP/1.1
+Authorization: Bearer {{token}}
+
+###
+POST {{baseUrl}}/tenants HTTP/1.1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "name": "Test VS",
+    "kind": "partner",
+    "parent_id": "{{root_tenant_id}}"
+}

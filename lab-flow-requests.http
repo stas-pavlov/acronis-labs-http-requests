@@ -62,3 +62,41 @@ Content-Type: application/json
 ###
 @customer_tenant_id = {{customer.response.body.id}}
 ###
+
+# Get availiable offering items for a partner
+# @name oiAvailibleForPartner
+GET {{baseUrl}}/tenants/{{root_tenant_id}}/offering_items/available_for_child?edition=pck_per_workload&kind=partner HTTP/1.1
+Authorization: Bearer {{token}}
+
+###
+@ois = {{oiAvailibleForPartner.response.body.items}}
+###
+
+# Set offering items for a partner
+PUT {{baseUrl}}/tenants/{{partner_tenant_id}}/offering_items 
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "offering_items": {{ois}} 
+}
+
+###
+
+# Get availiable offering items for a customer
+# @name oiAvailibleForCustomer
+GET {{baseUrl}}/tenants/{{partner_tenant_id}}/offering_items/available_for_child?edition=pck_per_workload&kind=customer HTTP/1.1
+Authorization: Bearer {{token}}
+
+###
+@ois = {{oiAvailibleForCustomer.response.body.items}}
+###
+
+# Set offering items for a customer
+PUT {{baseUrl}}/tenants/{{customer_tenant_id}}/offering_items 
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "offering_items": {{ois}} 
+}

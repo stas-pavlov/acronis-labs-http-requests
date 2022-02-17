@@ -47,6 +47,26 @@ Content-Type: application/json
 @partner_tenant_id = {{partner.response.body.id}}
 ###
 
+# Get a partner tenant
+# @name partner
+GET {{baseUrl}}/tenants/{{partner_tenant_id}} HTTP/1.1
+Authorization: Bearer {{token}}
+
+###
+@version = {{partner.response.body.version}}
+###
+
+# Update a partner tenant
+# @name partner
+PUT {{baseUrl}}/tenants/{{partner_tenant_id}} HTTP/1.1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "{{version}}": "{{version}}"
+}
+
+
 # Create a customer tenant
 # @name customer
 POST {{baseUrl}}/tenants HTTP/1.1

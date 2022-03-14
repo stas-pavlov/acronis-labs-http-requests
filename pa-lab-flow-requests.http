@@ -54,8 +54,80 @@ grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion={{token}}&scope
 
 ###
 
+# Get filtered resources list
+GET {{baseUrl2}}/api/resource_management/v4/resources
+Authorization: Bearer {{scoped_token}}
+
+###
+
 GET {{baseUrl2}}/api/resource_management/v4/resources?type=resource.machine
 Authorization: Bearer {{scoped_token}}
 
 ###
 
+GET {{baseUrl2}}/api/resource_management/v4/resources?search=test*
+Authorization: Bearer {{scoped_token}}
+
+###
+
+# @name demoPaging
+GET {{baseUrl2}}/api/resource_management/v4/resources?search=test*&limit=2
+Authorization: Bearer {{scoped_token}}
+
+###
+
+@after = {{demoPaging.response.body.paging.cursors.after}}
+
+###
+
+# @name demoPaging
+GET {{baseUrl2}}/api/resource_management/v4/resources?search=test*&limit=2&after={{after}}
+Authorization: Bearer {{scoped_token}}
+
+###
+
+@before = {{demoPaging.response.body.paging.cursors.before}}
+
+###
+
+# @name demoPaging
+GET {{baseUrl2}}/api/resource_management/v4/resources?search=test*&limit=2&before={{before}}
+Authorization: Bearer {{scoped_token}}
+
+###
+# Create a static group
+POST {{baseUrl2}}/api/resource_management/v4/resources
+Content-Type: application/json
+Authorization: Bearer {{scoped_token}}
+
+{
+    "type": "resource.group.computers",
+    "parent_group_ids": [
+        "301d1574-849e-4714-859f-3a2ec12a218b" 
+    ],
+    "allowed_member_types": [
+        "resource.machine"
+    ],
+    "name": "Static Group"
+}
+
+###
+
+# Create a dynamic group
+POST {{baseUrl2}}/api/resource_management/v4/resources
+Content-Type: application/json
+Authorization: Bearer {{scoped_token}}
+
+{
+    "type": "resource.group.computers",
+    "group_condition": "test-vm*",
+    "parent_group_ids": [
+        "301d1574-849e-4714-859f-3a2ec12a218b" 
+    ],
+    "allowed_member_types": [
+        "resource.machine"
+    ],
+    "name": "Dynamic Group"
+}
+
+###

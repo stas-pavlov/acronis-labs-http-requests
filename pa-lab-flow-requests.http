@@ -120,7 +120,7 @@ Authorization: Bearer {{scoped_token}}
 
 {
     "type": "resource.group.computers",
-    "group_condition": "test-vm*",
+    "group_condition": "test-vm*",
     "parent_group_ids": [
         "301d1574-849e-4714-859f-3a2ec12a218b" 
     ],
@@ -129,5 +129,68 @@ Authorization: Bearer {{scoped_token}}
     ],
     "name": "Dynamic Group"
 }
+
+###
+
+# Search for created groups ids
+GET {{baseUrl2}}/api/resource_management/v4/resources?search=*March*
+Authorization: Bearer {{scoped_token}}
+
+###
+
+# Delete created groups ids
+DELETE  {{baseUrl2}}/api/resource_management/v4/resources/<resource_id>
+Authorization: Bearer {{scoped_token}}
+
+###
+
+# Get resources statuses
+GET {{baseUrl2}}/api/resource_management/v4/resource_statuses?type=resource.machine
+Authorization: Bearer {{scoped_token}}
+
+###
+
+# Create a resource seection
+POST {{baseUrl2}}/api/resource_management/v4/context_selections
+Content-Type: application/json
+Authorization: Bearer {{scoped_token}}
+
+{
+  "items": [
+      "acd5ed67-a3e5-4efe-94cf-6bd71a388299",
+       "aab42c95-14dc-48ab-87b4-96120111b957" 
+  ],
+  "tenant_id": "{{cyber_protection_lab_customer_tenant_id}}"
+}
+
+###
+
+# Get resources selections
+GET {{baseUrl2}}/api/resource_management/v4/context_selections
+Authorization: Bearer {{scoped_token}}
+
+###
+
+# Delete resources selections
+DELETE {{baseUrl2}}/api/resource_management/v4/context_selections/<id>
+Authorization: Bearer {{scoped_token}}
+
+###
+
+# Get filtered protection plans list
+GET {{baseUrl2}}/api/policy_management/v4/policies
+Authorization: Bearer {{scoped_token}}
+
+###
+
+# Get filtered protection plans list
+GET {{baseUrl2}}/api/policy_management/v4/policies
+Authorization: Bearer {{scoped_token}}
+
+###
+
+# Get full composite protection plans for export
+GET {{baseUrl2}}/api/policy_management/v4/policies/<polici_id>?full_composite=true&include_settings=true
+Authorization: Bearer {{scoped_token}}
 
 ###

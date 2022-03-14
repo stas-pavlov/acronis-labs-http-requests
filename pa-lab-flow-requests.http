@@ -1,9 +1,18 @@
 
 # URL of Acronis DC with API version
 @baseUrl = https://dev-cloud.acronis.com/api/2
+@baseUrl2 = https://dev-cloud.acronis.com
+
+# A previously filled with data test lab tenant id
+@cyber_protection_lab_tenant_id = e1a4cda1-a798-4878-899b-bca06c2f4f89
+
+# A previously filled with data test lab customer tenant id
+# 71026519-65d4-4843-863a-f6058a667520
+@cyber_protection_lab_customer_tenant_id = 71026519-65d4-4843-863a-f6058a667520
+
 ###
 
-# Issue a JST token uning an API Client credentials
+# Issue a JWT token uning an API Client credentials
 # @name issueToken
 POST {{baseUrl}}/idp/token HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
@@ -31,343 +40,22 @@ Authorization: Bearer {{token}}
 
 ###
 
-# Create a partner tenant
-# @name partner
-POST {{baseUrl}}/tenants HTTP/1.1
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-    "name": "Partner 2 Set OI",
-    "kind": "partner",
-    "parent_id": "{{root_tenant_id}}"
-}
-
-###
-
-# Create a partner tenant
-# @name customer
-POST {{baseUrl}}/tenants HTTP/1.1
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-    "name": "Customer` Test",
-    "kind": "customer",
-    "parent_id": "{{root_tenant_id}}"
-}
-
-###
-
-@partner_tenant_id = {{partner.response.body.id}}
-###
-
-# Get a partner tenant
-# @name partner
-GET {{baseUrl}}/tenants/{{partner_tenant_id}} HTTP/1.1
+# Get a customer-scoped token
+# @name issueScopedToken
+POST {{baseUrl}}/idp/token HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
 Authorization: Bearer {{token}}
 
-###
-@tenant_version = {{partner.response.body.version}}
-###
-
-# Update a partner tenant
-# @name partner
-PUT {{baseUrl}}/tenants/{{partner_tenant_id}} HTTP/1.1
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-    "enabled": false,
-    "version": {{tenant_version}}
-}
-
+grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion={{token}}&scope=urn:acronis.com:tenant-id:{{cyber_protection_lab_customer_tenant_id}}
 
 ###
 
-@tenant_id=34f4d291-1a74-44ab-9cb5-3d354452455c
+@scoped_token = {{issueScopedToken.response.body.access_token}}
 
 ###
 
-# Get a teanant info
-# @name tenant
-GET {{baseUrl}}/tenants/{{tenant_id}} HTTP/1.1
-Authorization: Bearer {{token}}
-
-###
-@tenant_version={{tenant.response.body.version}}
-###
-
-# Disable a tenant
-# @name tenant
-PUT {{baseUrl}}/tenants/{{tenant_id}} HTTP/1.1
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-    "enabled": false,
-    "version": {{tenant_version}}
-}
-
-###
-@tenant_version={{tenant.response.body.version}}
-###
-
-# Delete a tenant
-DELETE  {{baseUrl}}/tenants/{{tenant_id}}?version={{tenant_version}} HTTP/1.1
-Authorization: Bearer {{token}}
+GET {{baseUrl2}}/api/resource_management/v4/resources?type=resource.machine
+Authorization: Bearer {{scoped_token}}
 
 ###
 
-# Create a customer tenant
-# @name customer
-POST {{baseUrl}}/tenants HTTP/1.1
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-    "name": "Customer 2 OI Folder Demo",
-    "kind": "customer",
-    "parent_id": "0505ad85-6688-4e89-9361-a49df75bd966"
-}
-
-###
-@customer_tenant_id={{customer.response.body.id}}
-###
-
-# Get pricing mode
-# @name pricing
-GET {{baseUrl}}/tenants/{{customer_tenant_id}}/pricing
-Authorization: Bearer {{token}}
-
-###
-
-@pricing_version={{pricing.response.body.version}}
-
-###
-
-PUT {{baseUrl}}/tenants/{{customer_tenant_id}}/pricing
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-    "mode" : "production",
-    "version": {{pricing_version}}     
-}
-
-###
-
-# Get availiable offering items for a partner
-# @name oiAvailibleForPartner
-GET {{baseUrl}}/tenants/{{root_tenant_id}}/offering_items/available_for_child?edition=pck_per_workload&kind=partner HTTP/1.1
-Authorization: Bearer {{token}}
-
-###
-
-# Set offering items for a partner
-PUT {{baseUrl}}/tenants/{{partner_tenant_id}}/offering_items 
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-    "offering_items": {{oiAvailibleForPartner.response.body.items}}
-}
-
-###
-
-# Get availiable offering items for a customer
-# @name oiAvailibleForCustomer
-GET {{baseUrl}}/tenants/0505ad85-6688-4e89-9361-a49df75bd966/offering_items/available_for_child?edition=pck_per_workload&kind=customer HTTP/1.1
-Authorization: Bearer {{token}}
-
-###
-
-# Set offering items for a customer
-PUT {{baseUrl}}/tenants/{{customer_tenant_id}}/offering_items 
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-    "offering_items": {{oiAvailibleForCustomer.response.body.items}} 
-}
-
-###
-
-GET {{baseUrl}}/applications/7459244f-68f3-3bf4-9f53-5f63ecc1d91f/settings/tenants/1cd50824-8ba4-45f8-8930-a2241b983172/hide_legacy_editions
-Authorization: Bearer {{token}}
-
-
-###
-
-PUT {{baseUrl}}/applications/7459244f-68f3-3bf4-9f53-5f63ecc1d91f/settings/tenants/1cd50824-8ba4-45f8-8930-a2241b983172/hide_legacy_editions
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-    "value": true
-}
-
-###
-
-PUT {{baseUrl}}/applications/7459244f-68f3-3bf4-9f53-5f63ecc1d91f/settings/tenants/{{partner_tenant_id}}/hide_legacy_editions
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-    "value": false
-}
-
-###
-
-# Get offering items for a customer
-GET  {{baseUrl}}/tenants/176810fc-27f1-4b3f-929b-1ce367d79e05/offering_items?edition=pck_per_gigabyte
-Authorization: Bearer {{token}}
-
-###
-
-# Set offering items for a customer
-PUT {{baseUrl}}/tenants/176810fc-27f1-4b3f-929b-1ce367d79e05/offering_items 
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-    "offering_items": [{
-      "deleted_at": null,
-      "updated_at": "2022-02-19T14:44:37",
-      "usage_name": "workstations",
-      "name": "pg_base_workstations",
-      "locked": false,
-      "edition": "pck_per_gigabyte",
-      "quota": {
-        "overage": null,
-        "version": 2,
-        "value": null
-      },
-      "tenant_id": "176810fc-27f1-4b3f-929b-1ce367d79e05",
-      "measurement_unit": "quantity",
-      "application_id": "6e6d758d-8e74-3ae3-ac84-50eb0dff12eb",
-      "status": 1,
-      "type": "count"
-    }]
-}
-
-###
-GET {{baseUrl}}/tenants/176810fc-27f1-4b3f-929b-1ce367d79e05/edition?application_id=6e6d758d-8e74-3ae3-ac84-50eb0dff12eb&target_edition=pck_per_gigabyte
-Authorization: Bearer {{token}}
-
-###
-PUT {{baseUrl}}/tenants/176810fc-27f1-4b3f-929b-1ce367d79e05/edition
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-    "application_id": "6e6d758d-8e74-3ae3-ac84-50eb0dff12eb",
-    "target_edition": "pck_per_gigabyte"
-
-}
-
-###
-GET {{baseUrl}}/applications
-Authorization: Bearer {{token}}
-
-###
-GET {{baseUrl}}/tenants/{{root_tenant_id}}/applications
-Authorization: Bearer {{token}}
-
-###
-DELETE {{baseUrl}}/applications/f9c5744e-bd1a-36b6-b0f0-ecd7483e1796/bindings/tenants/b6aa396b-3bb9-47c7-b7b3-09de9a40e5b2
-Authorization: Bearer {{token}}
-
-###
-GET {{baseUrl}}/users/check_login?username=roles.demo.feb.22
-Authorization: Bearer {{token}}
-
-###
-POST {{baseUrl}}/users
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{   
-    "tenant_id": "b6aa396b-3bb9-47c7-b7b3-09de9a40e5b2",
-    "login": "roles.demo.feb.22",
-    "contact": {
-        "email": "stas.pavlov@outlook.com"
-        }
-}
-
-###
-POST {{baseUrl}}/users/166e813f-e448-4e45-ad61-01fb10f8807c/send-activation-email
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-###
-POST {{baseUrl}}/users/97ce7d97-5141-4c0f-8b43-bc8c1bd45586/password
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-    "password": "MyStrongPassword123#"
-}
-
-###
-GET {{baseUrl}}/users/8868631e-d240-4f69-ada5-bb6d8089d3b4/access_policies 
-Authorization: Bearer {{token}}
-
-###
-PUT {{baseUrl}}/users/8868631e-d240-4f69-ada5-bb6d8089d3b4/access_policies 
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
- { "items": [{
-    "role_id": "partner_admin",
-    "tenant_id": "b6aa396b-3bb9-47c7-b7b3-09de9a40e5b2",
-    "trustee_id": "8868631e-d240-4f69-ada5-bb6d8089d3b4",
-    "trustee_type": "user",
-    "version": 0
-}]
-}
-
-###
-POST {{baseUrl}}/reports
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-    "parameters": {
-        "kind": "usage_summary",
-        "tenant_id": "e1a4cda1-a798-4878-899b-bca06c2f4f89",
-        "level": "all_customers",
-        "period": {
-            "start": "2022-01-01",
-            "end": "2022-01-31"
-        },
-        "formats": [
-            "csv_v2_0"
-        ],
-        "show_skus": true
-    },
-    "schedule": {
-        "type": "once"
-    },
-    "result_action": "save"
-}
-
-###
-GET {{baseUrl}}/reports/de7cffc6-5c9b-4121-8c0f-d184abf947d4/stored
-Authorization: Bearer {{token}}
-
-###
-GET {{baseUrl}}/reports/de7cffc6-5c9b-4121-8c0f-d184abf947d4/stored/998244d4-76da-44a8-a96e-1789b269fd2e
-Authorization: Bearer {{token}}
-
-###
-GET  {{baseUrl}}/tenants/e1a4cda1-a798-4878-899b-bca06c2f4f89/reports
-Authorization: Bearer {{token}}
-
-###
-GET  {{baseUrl}}/reports/dff0ecaf-aa41-446a-bcf1-ef63b173aebb
-Authorization: Bearer {{token}}
-
-###
-DELETE  {{baseUrl}}/reports/dff0ecaf-aa41-446a-bcf1-ef63b173aebb?version=1
-Authorization: Bearer {{token}}

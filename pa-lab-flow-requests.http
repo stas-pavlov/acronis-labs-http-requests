@@ -4,11 +4,11 @@
 @baseUrl2 = https://dev-cloud.acronis.com
 
 # A previously filled with data test lab tenant id
-@cyber_protection_lab_tenant_id = e1a4cda1-a798-4878-899b-bca06c2f4f89
+@cyber_protection_lab_tenant_id = <your_partner_tenant_id>
 
 # A previously filled with data test lab customer tenant id
 # 71026519-65d4-4843-863a-f6058a667520
-@cyber_protection_lab_customer_tenant_id = 71026519-65d4-4843-863a-f6058a667520
+@cyber_protection_lab_customer_tenant_id = <your_test_customer_tenant_id>
 
 ###
 
@@ -108,7 +108,7 @@ Authorization: Bearer {{scoped_token}}
     "allowed_member_types": [
         "resource.machine"
     ],
-    "name": "Static Group"
+    "name": "Training March Static Group"
 }
 
 ###
@@ -127,13 +127,13 @@ Authorization: Bearer {{scoped_token}}
     "allowed_member_types": [
         "resource.machine"
     ],
-    "name": "Dynamic Group"
+    "name": "Training March Dynamic Group"
 }
 
 ###
 
 # Search for created groups ids
-GET {{baseUrl2}}/api/resource_management/v4/resources?search=*March*
+GET {{baseUrl2}}/api/resource_management/v4/resources?search=test-vm*
 Authorization: Bearer {{scoped_token}}
 
 ###
@@ -145,7 +145,7 @@ Authorization: Bearer {{scoped_token}}
 ###
 
 # Get resources statuses
-GET {{baseUrl2}}/api/resource_management/v4/resource_statuses?type=resource.machine
+GET {{baseUrl2}}/api/resource_management/v4/resource_statuses?type=resource.machine&include_attributes=true
 Authorization: Bearer {{scoped_token}}
 
 ###
@@ -157,8 +157,8 @@ Authorization: Bearer {{scoped_token}}
 
 {
   "items": [
-      "acd5ed67-a3e5-4efe-94cf-6bd71a388299",
-       "aab42c95-14dc-48ab-87b4-96120111b957" 
+      "<resource_id1>",
+      "<resource_id2>" 
   ],
   "tenant_id": "{{cyber_protection_lab_customer_tenant_id}}"
 }
@@ -166,19 +166,19 @@ Authorization: Bearer {{scoped_token}}
 ###
 
 # Get resources selections
-GET {{baseUrl2}}/api/resource_management/v4/context_selections
+GET {{baseUrl2}}/api/resource_management/v4/context_selections/<context_id>
 Authorization: Bearer {{scoped_token}}
 
 ###
 
 # Delete resources selections
-DELETE {{baseUrl2}}/api/resource_management/v4/context_selections/<id>
+DELETE {{baseUrl2}}/api/resource_management/v4/context_selections/<context_id>
 Authorization: Bearer {{scoped_token}}
 
 ###
 
 # Get filtered protection plans list
-GET {{baseUrl2}}/api/policy_management/v4/policies
+GET {{baseUrl2}}/api/policy_management/v4/policies?type=policy.protection.disaster_recovery
 Authorization: Bearer {{scoped_token}}
 
 ###
@@ -190,7 +190,7 @@ Authorization: Bearer {{scoped_token}}
 ###
 
 # Get full composite protection plans for export
-GET {{baseUrl2}}/api/policy_management/v4/policies/<polici_id>?full_composite=true&include_settings=true
+GET {{baseUrl2}}/api/policy_management/v4/policies/<plan_id>?full_composite=true&include_settings=true
 Authorization: Bearer {{scoped_token}}
 
 ###
@@ -202,14 +202,12 @@ Authorization: Bearer {{scoped_token}}
 
 {
     "subject": {
-        "ignore_policy_and_tenant_ids": true,
-        "override_tenant_id": true,
         "disable_applications_on_conflict": true,
         "policy": [
             {
-                "id": "<parent_plan_uuid>",
+                "id": "<plan_id>",
                 "type": "policy.protection.total",
-                "name": "<Plan Name>",
+                "name": "<plan_name>",
                 "origin": "upstream",
                 "enabled": true,
                 "template_source_id": "",
@@ -219,9 +217,9 @@ Authorization: Bearer {{scoped_token}}
                 "ls_features": ""
             },
             {
-                "id": "<plan_uuid>",
+                "id": "<backup_policy_id>",
                 "parent_ids": [
-                    "<parent_plan_uuid>"
+                    "<plan_id>"
                 ],
                 "type": "policy.backup.machine",
                 "origin": "upstream",
@@ -390,7 +388,7 @@ Authorization: Bearer {{scoped_token}}
 ###
 
 # Get full policy for update
-GET {{baseUrl2}}/api/policy_management/v4/policies/<id>?full_composite=true&include_settings=true
+GET {{baseUrl2}}/api/policy_management/v4/policies/<plan_id>?full_composite=true&include_settings=true
 Content-Type: application/json
 Authorization: Bearer {{scoped_token}}
 
@@ -398,21 +396,23 @@ Authorization: Bearer {{scoped_token}}
 ###
 
 # Update a policy
-PATCH {{baseUrl2}}/api/policy_management/v4/policies
+PATCH {{baseUrl2}}/api/policy_management/v4/policies/<plan_id>
 Content-Type: application/json
 Authorization: Bearer {{scoped_token}}
 
 {
     "subject": {
-        <policy_json_put_here>
-        }    
+        
+  "policy": [
+      <put_policy_body_here>
+      ]
+  }    
 }
 
 ###
 
 # Delete a policy
-DELETE  {{baseUrl2}}/api/policy_management/v4/policies/<id>
-Authorization: Bearer {{scoped_token}}
+DELETE  {{baseUrl2}}/api/policy_management/v4/policies/<plan_id>
 
 ###
 
@@ -422,7 +422,9 @@ Content-Type: application/json
 Authorization: Bearer {{scoped_token}}
 
 {
-
+    "items":[
+      "<plan_id>"
+    ]
 }
 
 ###
@@ -434,7 +436,7 @@ Authorization: Bearer {{scoped_token}}
 ###
 
 # Delete plan selections
-DELETE  {{baseUrl2}}/api/policy_management/v4/policy_selections/<id>
+DELETE  {{baseUrl2}}/api/policy_management/v4/policy_selections/<policy_selection_id>
 Authorization: Bearer {{scoped_token}}
 
 ###
@@ -445,10 +447,10 @@ Content-Type: application/json
 Authorization: Bearer {{scoped_token}}
 
 {
-    "policy_id": "policy_id",
+    "policy_id": "<plan_id>",
     "context": {
         "items": [
-            "resource_id1"
+            "<resource_id>"
         ]
     },
     "disable_on_conflict": true
@@ -457,11 +459,99 @@ Authorization: Bearer {{scoped_token}}
 ###
 
 # Revoce a plan
-DELETE  {{baseUrl2}}/api/policy_management/v4/applications?context_id=<resourece_id>&policy_id=<policy_id>
+DELETE  {{baseUrl2}}/api/policy_management/v4/applications?context_id=<resource_id>&policy_id=<plan_id>
 Authorization: Bearer {{scoped_token}}
 
 ###
 
 # Get a filtered applications list
-GET {{baseUrl2}}/api/policy_management/v4/applications
+GET {{baseUrl2}}/api/policy_management/v4/applications?include_running_blockers=true&include_deployment_errors=true&include_validation_issues=true
 Authorization: Bearer {{scoped_token}}
+
+# include_multiple_applications_conflict
+# include_validation_issues
+# include_deployment_errors
+# include_running_blockers
+
+###
+PUT {{baseUrl2}}/api/policy_management/v4/applications/run
+Authorization: Bearer {{scoped_token}}
+Content-Type: application/json
+
+{
+    "state": "running",
+    "policy_id": "<plan_id>",
+    "context_ids": [
+            "<resource_id>"
+    ]
+}
+
+###
+GET {{baseUrl}}/tenants/{{cyber_protection_lab_customer_tenant_id}}/registration_tokens
+Authorization: Bearer {{token}}
+
+###
+GET {{baseUrl}}/tenants/{{cyber_protection_lab_customer_tenant_id}}/users
+Authorization: Bearer {{token}}
+
+###
+GET {{baseUrl}}/users/<user_id>
+Authorization: Bearer {{token}}
+
+###
+POST {{baseUrl}}/tenants/{{cyber_protection_lab_customer_tenant_id}}/registration_tokens
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+	"expires_in": 259200,
+	"scopes": [
+		"urn:acronis.com:tenant-id:<personal_tenant_id>:backup_agent_admin"	
+	]
+}
+
+###
+GET {{baseUrl2}}/api/1/groups/{{cyber_protection_lab_customer_tenant_id}}
+Authorization: Bearer {{token}}
+
+###
+POST {{baseUrl}}/tenants/{{cyber_protection_lab_customer_tenant_id}}/registration_tokens
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+	"expires_in": 259200,
+	"scopes": [
+		"urn:acronis.com:tenant-id:<personal_tenant_id>:backup_agent_admin",
+    "urn:acronis.com::policy_management:<customer_big_int_id>|<plan_id>:apply_revoke"
+
+	]
+}
+
+###
+
+# Exchange a registration token
+# @name exchangeToken
+POST {{baseUrl}}/idp/token HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=<reg-token>
+
+###
+
+@exhcangedToken = {{exchangeToken.response.body.access_token}}
+
+###
+
+# Apply a plan
+POST {{baseUrl2}}/api/policy_management/v4/applications
+Authorization: Bearer {{exhcangedToken}}
+
+{
+     "context": {
+         "items": [
+             "<resource_id_from_the_first_step>"
+         ]
+     }
+}
+
